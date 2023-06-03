@@ -19,8 +19,8 @@ void generateField(uint8_t **field, int mines_amount, int size)
 
 	while (mines_left != 0)
 	{
-		x = random() % size;
-		y = random() % size;
+		x = rand() % size;
+		y = rand() % size;
 		if (field[y][x] == MINE)
 			continue;
 		field[y][x] = MINE;
@@ -42,7 +42,7 @@ int main(int argc, char **argv)
 	uint8_t size, mines;
 	if (argc != 3 || !sscanf(argv[2], "%hhu", &size) || !sscanf(argv[1], "%hhu", &mines) || size == 0)
 		usage();
-	srandom(time(NULL));
+	srand(time(NULL));
 
 	uint8_t **field = malloc(size * sizeof(*field));
 	for(uint8_t i = 0; i < size; i++)
