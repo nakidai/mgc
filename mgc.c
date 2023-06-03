@@ -23,13 +23,13 @@ void generateField(uint8_t **field, int mines_amount, int size)
 		y = rand() % size;
 		if (field[y][x] == MINE)
 			continue;
-		field[y][x] = MINE;
+		field[y][x] += MINE;
 		for (int8_t i = -1; i < 2; ++i)
 			for (int8_t j = -1; j < 2; ++j)
 			{
 				int8_t yr = y+j;
 				int8_t xr = x+i;
-				if (yr < 0 || xr < 0 || yr >= size || xr >= size || field[yr][xr] == MINE)
+				if (yr < 0 || xr < 0 || yr >= size || xr >= size)
 					continue;
 				++field[yr][xr];
 			}
@@ -57,7 +57,7 @@ int main(int argc, char **argv)
 	{
 		for (uint8_t j = 0; j < size; ++j)
 		{
-			if (field[j][i] == MINE)
+			if (field[j][i] >= MINE)
 			{
 				printf("||`BM`||");
 				continue;
