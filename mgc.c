@@ -11,6 +11,14 @@ void usage(void)
 	exit(1);
 }
 
+#define free2DArray(x, y) _free2DArray((void **)x, y)
+void _free2DArray(void **arr, uint32_t size)
+{
+	for(uint32_t i = 0; i < size; ++i)
+		free(arr[i]);
+	free(arr);
+}
+
 void generateField(uint8_t **field, int mines_amount, int size)
 {
 	uint8_t mines_left = mines_amount;
@@ -67,6 +75,6 @@ int main(int argc, char **argv)
 		printf("\n");
 	}
 
-	free(field);
+	free2DArray(field, size);
 	exit(0);
 }
