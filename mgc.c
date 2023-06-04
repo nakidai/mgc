@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <time.h>
+#include <stdarg.h>
 
 #define MINE 10
 
@@ -11,27 +12,24 @@ void usage(void)
 	exit(1);
 }
 
-#define free2DArray(x, y) _free2DArray((void **)x, y)
-void _free2DArray(void **arr, uint32_t size)
+uint8_t getElementFrom2DArray8(uint8_t *field, int x, int y)
 {
-	for(uint32_t i = 0; i < size; ++i)
-		free(arr[i]);
-	free(arr);
+	return *(field + (y*sizeof(field)) + x);
 }
 
-void generateField(uint8_t **field, int mines_amount, int size)
+void generateField(uint8_t *field, int mines_amount, int size)
 {
 	uint8_t mines_left = mines_amount;
 	uint8_t x;
 	uint8_t y;
 
 	while (mines_left != 0)
-	{
+	{ 
 		x = rand() % size;
 		y = rand() % size;
-		if (field[y][x] == MINE)
+		if (getElementFrom2DArray8(field, y, x) == MINE)
 			continue;
-		field[y][x] += MINE;
+		getElementFrom2DArray8(field, y, x) += MINE;
 		for (int8_t i = -1; i < 2; ++i)
 			for (int8_t j = -1; j < 2; ++j)
 			{
@@ -39,7 +37,7 @@ void generateField(uint8_t **field, int mines_amount, int size)
 				int8_t xr = x+i;
 				if (yr < 0 || xr < 0 || yr >= size || xr >= size)
 					continue;
-				++field[yr][xr];
+				++getElementFrom2DArray8(field, yr, xr);
 			}
 		--mines_left;
 	}
@@ -52,9 +50,9 @@ int main(int argc, char **argv)
 		usage();
 	srand(time(NULL));
 
-	uint8_t **field = malloc(size * sizeof(*field));
-	for(uint8_t i = 0; i < size; i++)
-    field[i] = malloc(size * sizeof(*field[i]));
+	uint8_t (*field)[size] = malloc(sizeof(uint8_t[size][size]));
+	// for(uint8_t i = 0; i < size; i++)
+  //   field[i] = malloc(size * sizeof(*field[i]));
 	for (uint8_t i = 0; i < size; ++i)
 		for (uint8_t j = 0; j < size; ++j)
 			field[j][i] = 0;
@@ -65,16 +63,16 @@ int main(int argc, char **argv)
 	{
 		for (uint8_t j = 0; j < size; ++j)
 		{
-			if (field[j][i] >= MINE)
+			if (getElementFrom2DArray8(field, j, i) >= MINE)
 			{
 				printf("||`BM`||");
 				continue;
 			}
-			printf("||` %d`||", field[j][i]);
+			printf("||` %d`||", getElementFrom2DArray8(field, j, i));
 		}
 		printf("\n");
 	}
 
-	free2DArray(field, size);
+	free(field);
 	exit(0);
 }
