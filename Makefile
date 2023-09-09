@@ -1,4 +1,4 @@
-CC     = gcc
+CC     = tcc
 CFLAGS =
 OUT    = mgc
 

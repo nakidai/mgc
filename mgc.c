@@ -2,36 +2,44 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <time.h>
+#include <string.h>
 
 #define MINE 10
 
+struct field_t
+{
+	uint8_t size;
+	uint8_t *field;
+};
+
 void usage(void)
 {
-	fprintf(stderr, "usage: mgc mines size\n");
+	fprintf(
+		stderr, "%s",
+		"usage: mgc mines size\n"
+		"mines: (0, size^2]\n"
+		"size:  (0, 10)\n");
 	exit(1);
 }
 
-#define free2DArray(x, y) _free2DArray((void **)x, y)
-void _free2DArray(void **arr, uint32_t size)
+uint8_t *getelem(struct field_t field, uint8_t y, uint8_t x)
 {
-	for(uint32_t i = 0; i < size; ++i)
-		free(arr[i]);
-	free(arr);
+	return field.field + y*field.size + x;
 }
 
-void generateField(uint8_t **field, int mines_amount, int size)
+void generateField(struct field_t field, int mines_amount)
 {
 	uint8_t mines_left = mines_amount;
-	uint8_t x;
-	uint8_t y;
+	uint8_t x, y;
+	uint8_t size = field.size;
 
 	while (mines_left != 0)
 	{
 		x = rand() % size;
 		y = rand() % size;
-		if (field[y][x] == MINE)
+		if (*getelem(field, y, x) >= MINE)
 			continue;
-		field[y][x] += MINE;
+		*getelem(field, y, x) += MINE;
 		for (int8_t i = -1; i < 2; ++i)
 			for (int8_t j = -1; j < 2; ++j)
 			{
@@ -39,7 +47,7 @@ void generateField(uint8_t **field, int mines_amount, int size)
 				int8_t xr = x+i;
 				if (yr < 0 || xr < 0 || yr >= size || xr >= size)
 					continue;
-				++field[yr][xr];
+				++*getelem(field, yr, xr);
 			}
 		--mines_left;
 	}
@@ -48,33 +56,35 @@ void generateField(uint8_t **field, int mines_amount, int size)
 int main(int argc, char **argv)
 {
 	uint8_t size, mines;
-	if (argc != 3 || !sscanf(argv[2], "%hhu", &size) || !sscanf(argv[1], "%hhu", &mines) || size == 0)
+	if (argc != 3 ||
+		!sscanf(argv[2], "%hhu", &size) || !sscanf(argv[1], "%hhu", &mines)
+		|| size == 0 || size > 9|| mines > size*size)
 		usage();
 	srand(time(NULL));
 
-	uint8_t **field = malloc(size * sizeof(*field));
-	for(uint8_t i = 0; i < size; i++)
-    field[i] = malloc(size * sizeof(*field[i]));
-	for (uint8_t i = 0; i < size; ++i)
-		for (uint8_t j = 0; j < size; ++j)
-			field[j][i] = 0;
+	struct field_t field = {
+		size,
+		malloc(size*size)
+	};
+	memset(field.field, 0, size*size);
 
-	generateField(field, mines, size);
+	generateField(field, mines);
+
 	printf("%d mines:\n", mines);
 	for (uint8_t i = 0; i < size; ++i)
 	{
 		for (uint8_t j = 0; j < size; ++j)
 		{
-			if (field[j][i] >= MINE)
+			if (*getelem(field, j, i) >= MINE)
 			{
 				printf("||`BM`||");
 				continue;
 			}
-			printf("||` %d`||", field[j][i]);
+			printf("||` %d`||", *getelem(field, j, i));
 		}
 		printf("\n");
 	}
 
-	free2DArray(field, size);
+	free(field.field);
 	exit(0);
 }
