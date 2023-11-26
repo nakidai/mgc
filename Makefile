@@ -1,9 +1,6 @@
-CC     = tcc
-CFLAGS =
-OUT    = mgc
+all: mgc
 
-$(OUT) : mgc.c
-	$(CC) $(CFLAGS) -o $@ $<
+clean:
+	rm mgc
 
-buildrun: $(OUT)
-	./$(OUT) 10 9
+.PHONY: all clean
